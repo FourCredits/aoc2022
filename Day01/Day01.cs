@@ -1,6 +1,6 @@
-﻿global using Input = System.Collections.Generic.IEnumerable<int>;
+﻿using AOC.Common;
 
-using AOC.Common;
+using Input = System.Collections.Generic.IEnumerable<int>;
 
 var input = Parse(File.ReadAllLines("inputs/01.txt"));
 Console.WriteLine($"part 1: {Part1(input)}");
