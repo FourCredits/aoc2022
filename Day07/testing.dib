@@ -1,0 +1,64 @@
+#!csharp
+
+public static T2 GetValueOrInsert<T1, T2>(
+    this IDictionary<T1, T2> dict,
+    T1 key,
+    Func<T2> valueGenerator)
+{
+    if (!dict.ContainsKey(key)) dict[key] = valueGenerator();
+    return dict[key];
+}
+
+#!csharp
+
+using System.Globalization;
+public static int Read(this string s) =>
+        int.Parse(s, new CultureInfo("en-NZ"));
+
+#!csharp
+
+using System.IO;
+var lines = File.ReadAllLines("../inputs/practice.txt");
+
+#!csharp
+
+Dictionary<string, int> files = new();
+Dictionary<string, List<string>> directories = new();
+var cwd = "";
+foreach (var line in lines)
+{
+    var words = line.Split(' ');
+    if (words[0] == "$")
+    {
+        if (words[1] == "cd")
+            cwd = words[2];
+    }
+    else
+    {
+        directories.GetValueOrInsert(cwd, () => new()).Add(words[1]);
+        if (words[0] == "dir")
+            _ = directories.GetValueOrInsert(cwd, () => new());
+        else
+            files[words[1]] = words[0].Read();
+    }
+}
+
+#!csharp
+
+Dictionary<string, int> memo = new();
+int SizeOfFile(string file) =>
+    memo.GetValueOrInsert(file, () => files.TryGetValue(file, out var size)
+        ? size
+        : directories[file].Select(SizeOfFile).Sum());
+
+#!csharp
+
+directories.Keys.Select(SizeOfFile).Where(size => size <= 100_000).Sum()
+
+#!csharp
+
+directories.Keys.Select(SizeOfFile).Where(size => size <= 100_000)
+
+#!csharp
+
+directories.Keys.Where(d => SizeOfFile(d) <= 100_000)
