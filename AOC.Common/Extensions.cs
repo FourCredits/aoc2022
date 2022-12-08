@@ -32,7 +32,7 @@ public static class Extensions
         }
     }
 
-    public static T2 GetValueOr<T1, T2>(
+    public static T2 GetValueOrInsert<T1, T2>(
         this IDictionary<T1, T2> dict,
         T1 key,
         Func<T2> valueGenerator)

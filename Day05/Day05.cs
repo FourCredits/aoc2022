@@ -14,8 +14,8 @@ foreach (var row in startingPositions[1..])
     foreach (var (i, c) in row.Enumerate())
         if (char.IsUpper(c) && positions.TryGetValue(i, out var pos))
         {
-            stacks1.GetValueOr(pos, () => new()).Add(c);
-            stacks2.GetValueOr(pos, () => new()).Add(c);
+            stacks1.GetValueOrInsert(pos, () => new()).Add(c);
+            stacks2.GetValueOrInsert(pos, () => new()).Add(c);
         }
 Console.WriteLine($"part 1: {Part1(stacks1, instructions)}");
 Console.WriteLine($"part 2: {Part2(stacks2, instructions)}");
