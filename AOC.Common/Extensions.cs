@@ -18,6 +18,8 @@ public static class Extensions
                 result.Add(current);
                 current = new();
             }
+        if (current.Any())
+            result.Add(current);
         return result;
     }
 
