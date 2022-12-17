@@ -48,6 +48,12 @@ public static class Extensions
     public static int Read(this string s) =>
         int.Parse(s, new CultureInfo("en-NZ"));
 
+    public static int Read(this Span<char> s) =>
+        int.Parse(s, NumberStyles.None, new CultureInfo("en-NZ"));
+
+    public static int Read(this ReadOnlySpan<char> s) =>
+        int.Parse(s, NumberStyles.None, new CultureInfo("en-NZ"));
+
     public static IEnumerable<((int, int), char)> Grid(this string[] lines)
     {
         foreach (var (y, line) in lines.Enumerate())
