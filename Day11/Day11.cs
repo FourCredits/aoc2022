@@ -3,17 +3,27 @@
 using AOC.Common;
 
 var rx = TextNumber();
-var monkeys = Parse(File.ReadAllLines("inputs/practice.txt"));
-// var monkeys = Parse(File.ReadAllLines("inputs/11.txt"));
+var monkeys = Parse(File.ReadAllLines("inputs/11.txt"));
 var monkeys2 = monkeys.Select(m => new Monkey(m)).ToList();
-// 57838
-var part1 = Part1(monkeys);
-Console.WriteLine($"part 1: {part1}");
-// 1572154518 is too low
-var part2 = Part2(monkeys2);
-Console.WriteLine($"part 2: {part2}");
+Console.WriteLine($"part 1: {Part1(monkeys)}");  // 57838
+Console.WriteLine($"part 2: {Part2(monkeys2)}"); // 15050382231
 
-ulong Solve(int rounds, Func<Monkey, ulong, ulong> worryCalc, List<Monkey> monkeys)
+ulong Part1(List<Monkey> monkeys) =>
+    Solve(20, (m, i) => m.Inspect(i) / 3, monkeys);
+
+ulong Part2(List<Monkey> monkeys)
+{
+    // Thanks to https://chasingdings.com/2022/12/11/advent-of-code-day-11-monkey-in-the-middle/
+    // for the idea of the modulo `% wrap` bit. I knew something like that was
+    // involved, but I couldn't figure out what
+    var wrap = monkeys.Select(m => m.TestNum).Aggregate((a, b) => a * b);
+    return Solve(10_000, (m, i) => m.Inspect(i) % wrap, monkeys);
+}
+
+ulong Solve(
+    int rounds,
+    Func<Monkey, ulong, ulong> calcWorry,
+    List<Monkey> monkeys)
 {
     for (var round = 0; round < rounds; ++round)
     {
@@ -21,11 +31,13 @@ ulong Solve(int rounds, Func<Monkey, ulong, ulong> worryCalc, List<Monkey> monke
         {
             foreach (var item in monkey.Items)
             {
-                monkey.ItemsThrown++;
-                var worry = worryCalc(monkey, item);
-                var next = monkey.Test(worry) ? monkey.IfTrue : monkey.IfFalse;
+                var worry = calcWorry(monkey, item);
+                var next = worry % monkey.TestNum == 0
+                    ? monkey.IfTrue
+                    : monkey.IfFalse;
                 monkeys[next].Items.Add(worry);
             }
+            monkey.ItemsThrown += (ulong)monkey.Items.Count;
             monkey.Items.Clear();
         }
     }
@@ -36,19 +48,12 @@ ulong Solve(int rounds, Func<Monkey, ulong, ulong> worryCalc, List<Monkey> monke
         .Aggregate((a, b) => a * b);
 }
 
-ulong Part1(List<Monkey> monkeys) =>
-    Solve(20, (m, i) => m.Inspect(i) / 3, monkeys);
-
-ulong Part2(List<Monkey> monkeys) =>
-    Solve(10_000, (m, i) => m.Inspect(i), monkeys);
-
 List<Monkey> Parse(IEnumerable<string> lines) =>
     lines.SplitBy(s => s != "").Select(ParseMonkey).ToList();
 
 Monkey ParseMonkey(IEnumerable<string> lines)
 {
     var source = lines.ToArray();
-    var testNum = ExtractNum(source[3]);
     return new(
         Number: TextNumberColon().Match(source[0]).Groups[1].Value.Read(),
         Items: TextThenNumberList()
@@ -58,7 +63,7 @@ Monkey ParseMonkey(IEnumerable<string> lines)
             .Select(n => (ulong)n.Value.Read())
             .ToList(),
         Inspect: DetermineInspectionFunction(source[2]),
-        Test: worryLevel => worryLevel % (ulong)testNum == 0,
+        TestNum: (ulong)ExtractNum(source[3]),
         IfTrue: ExtractNum(source[4]),
         IfFalse: ExtractNum(source[5]));
 }
@@ -83,7 +88,7 @@ public record class Monkey(
     int Number,
     List<ulong> Items,
     Func<ulong, ulong> Inspect,
-    Func<ulong, bool> Test,
+    ulong TestNum,
     int IfTrue,
     int IfFalse)
 {
@@ -94,7 +99,7 @@ public record class Monkey(
         Number = m.Number;
         Items = new(m.Items);
         Inspect = m.Inspect;
-        Test = m.Test;
+        TestNum = m.TestNum;
         IfTrue = m.IfTrue;
         IfFalse = m.IfFalse;
     }
