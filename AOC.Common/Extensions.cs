@@ -47,4 +47,11 @@ public static class Extensions
     // made the decision to squash that error by putting the locale in one place
     public static int Read(this string s) =>
         int.Parse(s, new CultureInfo("en-NZ"));
+
+    public static IEnumerable<((int, int), char)> Grid(this string[] lines)
+    {
+        foreach (var (y, line) in lines.Enumerate())
+            foreach (var (x, c) in line.Enumerate())
+                yield return ((y, x), c);
+    }
 }
