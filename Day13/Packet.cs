@@ -7,9 +7,8 @@ namespace Day13;
 
 public record struct Packet(
     int? Value,
-    IReadOnlyList<Packet> Elements)
+    IReadOnlyList<Packet> Elements) : IComparable
 {
-
     public static Packet? Parse(ReadOnlySpan<char> s) =>
         Parse(s, 0) is var (data, _) ? data : null;
 
@@ -21,14 +20,15 @@ public record struct Packet(
         {
             var elements = new List<Packet>();
             var c = cursor + 1;
-            while (s[c] != ']' && Parse(s, c) is var (element, newCursor))
+            while (s[c] != ']')
             {
+                var result = Parse(s, c);
+                if (result is null) return null;
+                (var element, c) = result.Value;
                 elements.Add(element);
-                c = newCursor + 1;
-                if (s[newCursor] == ']')
-                    break;
+                if (s[c] == ',') c++;
             }
-            return (new(null, elements), c);
+            return (new(null, elements), c + 1);
         }
         else
         {
@@ -66,15 +66,38 @@ public record struct Packet(
 
     private static bool CompareLists(Packet left, Packet right)
     {
-        var i = 0;
-        for (; i < left.Elements.Count && i < right.Elements.Count; ++i)
+        if (left.Elements.Count == 0 && right.Elements.Count == 0)
+        {
+            return false;
+        }
+        if (left.Elements.Count == 0)
+        {
+            return true;
+        }
+        if (right.Elements.Count == 0)
+        {
+            return false;
+        }
+        for (var i = 0; i < int.Min(left.Elements.Count, right.Elements.Count); ++i)
         {
             if (left.Elements[i] < right.Elements[i])
+            {
                 return true;
+            }
             if (left.Elements[i] > right.Elements[i])
+            {
                 return false;
+            }
         }
         return left.Elements.Count < right.Elements.Count;
+    }
+
+    public int CompareTo(object? obj)
+    {
+        var right = obj as Packet?;
+        return right is null || this < right ? -1 :
+            this == right ? 0 :
+            1;
     }
 
     public static bool operator >(Packet left, Packet right) =>
