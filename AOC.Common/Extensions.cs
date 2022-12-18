@@ -60,4 +60,32 @@ public static class Extensions
             foreach (var (x, c) in line.Enumerate())
                 yield return ((y, x), c);
     }
+
+    public static IEnumerable<IEnumerable<T>> Windows<T>(
+        this IEnumerable<T> iter,
+        int windowSize,
+        WindowMode mode = WindowMode.TrimPartials,
+        int shiftAmount = 1) =>
+        0.Iterate(i => i + shiftAmount)
+            .Select(i => iter.Skip(i).Take(windowSize))
+            .TakeWhile(
+                mode == WindowMode.KeepPartials
+                    ? window => window.Any()
+                    : window => window.Count() == windowSize);
+
+    public static IEnumerable<T> Iterate<T>(this T start, Func<T, T> f)
+    {
+        var x = start;
+        while (true)
+        {
+            yield return x;
+            x = f(x);
+        }
+    }
+}
+
+public enum WindowMode
+{
+    KeepPartials,
+    TrimPartials,
 }
