@@ -9,7 +9,7 @@ this to help get used to the language.
 To run any particular day `xy`, run:
 
 ```sh
-$ dotnet run --project day<xy>
+$ dotnet run --project Day<xy>
 ```
 
 (assumes you already have the dotnet CLI installed)
