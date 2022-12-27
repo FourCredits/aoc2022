@@ -82,6 +82,13 @@ public static class Extensions
             x = f(x);
         }
     }
+
+    public static IEnumerable<T> Cycle<T>(this IEnumerable<T> values)
+    {
+        while (true)
+            foreach (var value in values)
+                yield return value;
+    }
 }
 
 public enum WindowMode
