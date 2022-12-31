@@ -5,20 +5,27 @@ var blueprints = File
     .ReadAllLines(practice ? "inputs/practice.txt" : "inputs/19.txt")
     .Select(Blueprint.Parse);
 var part1 = blueprints
-    .Select(blueprint => SearchOptionSpace(blueprint).Max() * blueprint.Id)
+    .Select(blueprint => SearchOptionSpace(blueprint, 24).Max() * blueprint.Id)
     .Sum();
 Console.WriteLine($"part 1: {part1}");
+var part2 = blueprints
+    .Take(3)
+    .Select(blueprint => SearchOptionSpace(blueprint, 32).Max())
+    .Aggregate((a, b) => a * b);
+Console.WriteLine($"part 2: {part2}");
 
-static IEnumerable<int> SearchOptionSpace(Blueprint blueprint)
+static IEnumerable<int> SearchOptionSpace(Blueprint blueprint, int time)
 {
-    Console.WriteLine(blueprint);
+    // Console.WriteLine(blueprint);
     Stack<State> states = new();
-    states.Push(State.Start);
-    HashSet<State> visited = new() { State.Start };
+    var start = State.Start(time);
+    states.Push(start);
+    HashSet<State> visited = new() { start };
     while (states.TryPop(out var state))
     {
+        state = state.Minimise(blueprint);
         // Console.WriteLine(state);
-        if (state.Time == 24)
+        if (state.TimeLeft == 0)
         {
             yield return state.Geodes;
             continue;

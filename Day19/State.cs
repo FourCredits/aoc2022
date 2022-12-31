@@ -9,9 +9,9 @@ public readonly record struct State(
     int GeodeRobots = 0,
     int ObsidianRobots = 0,
     int ClayRobots = 0,
-    int Time = 0)
+    int TimeLeft = 0)
 {
-    public static readonly State Start = new(OreRobots: 1);
+    public static State Start(int time) => new(OreRobots: 1, TimeLeft: time);
 
     public IEnumerable<State?> NextStates(Blueprint blueprint) => new[]
     {
@@ -28,7 +28,7 @@ public readonly record struct State(
 
     public State Tick() => this with
     {
-        Time = Time + 1,
+        TimeLeft = TimeLeft - 1,
         Ore = Ore + OreRobots,
         Clay = Clay + ClayRobots,
         Obsidian = Obsidian + ObsidianRobots,
@@ -50,6 +50,26 @@ public readonly record struct State(
         Ore < oreNeeded || Obsidian < obsidianNeeded
             ? null
             : Tick().AddGeodeRobot(oreNeeded, obsidianNeeded);
+
+    public State Minimise(Blueprint blueprint) => this with
+    {
+        OreRobots = Math.Min(OreRobots, blueprint.MaxOreCost),
+        ClayRobots = Math.Min(ClayRobots, blueprint.ClayForObsidianRobot),
+        ObsidianRobots = Math.Min(
+            ObsidianRobots,
+            blueprint.ObsidianForGeodeRobot),
+        Ore = Math.Min(
+            Ore,
+            (TimeLeft * blueprint.MaxOreCost) - (OreRobots * (TimeLeft - 1))),
+        Clay = Math.Min(
+            Clay,
+            (TimeLeft * blueprint.ClayForObsidianRobot) -
+                (ClayRobots * (TimeLeft - 1))),
+        Obsidian = Math.Min(
+            Obsidian,
+            (TimeLeft * blueprint.ObsidianForGeodeRobot) -
+                (ObsidianRobots * (TimeLeft - 1))),
+    };
 
     // adds a ore robot without checking the bounds
     private State AddOreRobot(int oreNeeded) => this with

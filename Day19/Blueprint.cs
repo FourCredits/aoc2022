@@ -9,6 +9,12 @@ public readonly record struct Blueprint(
     int OreForGeodeRobot,
     int ObsidianForGeodeRobot)
 {
+    public int MaxOreCost => new[] {
+        OreForOreRobot,
+        OreForClayRobot,
+        OreForObsidianRobot,
+        OreForGeodeRobot}.Max();
+
     public static Blueprint Parse(string s)
     {
         var nums = AOC.Common.Parse.ManyInts(s);
