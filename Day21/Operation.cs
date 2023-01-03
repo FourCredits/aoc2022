@@ -36,6 +36,8 @@ public class Operation
     public static readonly Operation Subtract = new((a, b) => a - b);
     public static readonly Operation Multiply = new((a, b) => a * b);
     public static readonly Operation Divide = new((a, b) => a / b);
+    public static readonly Operation Fail =
+        new((a, b) => throw new ArgumentException("I am a failure :("));
 }
 
 public enum Operand
