@@ -1,6 +1,5 @@
 ﻿using AOC.Common;
 
-// var lines = File.ReadAllLines("inputs/practice.txt");
 var lines = File.ReadAllLines("inputs/14.txt");
 var occupied = new Dictionary<(int x, int y), Tile>();
 foreach (var p in lines.Select(ParseLine).SelectMany(RealiseStructure))

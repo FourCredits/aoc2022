@@ -1,8 +1,7 @@
 ﻿using AOC.Common;
 
-var practice = args.Length > 0 && args[0] == "practice";
 var points = File
-    .ReadAllLines(practice ? "inputs/practice.txt" : "inputs/18.txt")
+    .ReadAllLines("inputs/18.txt")
     .Select(Parse)
     .ToHashSet();
 var part1 = points

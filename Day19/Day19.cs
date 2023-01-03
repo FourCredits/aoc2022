@@ -1,9 +1,6 @@
 ﻿using Day19;
 
-var practice = args.Length > 0 && args[0] == "practice";
-var blueprints = File
-    .ReadAllLines(practice ? "inputs/practice.txt" : "inputs/19.txt")
-    .Select(Blueprint.Parse);
+var blueprints = File.ReadAllLines("inputs/19.txt").Select(Blueprint.Parse);
 var part1 = blueprints
     .Select(blueprint => SearchOptionSpace(blueprint, 24).Max() * blueprint.Id)
     .Sum();

@@ -2,11 +2,7 @@
 
 using Day20;
 
-var practice = args.Length > 0 && args[0] == "practice";
-var input = File
-    .ReadAllLines(practice ? "inputs/practice.txt" : "inputs/20.txt")
-    .Select(int.Parse)
-    .Enumerate();
+var input = File.ReadAllLines("inputs/20.txt").Select(int.Parse).Enumerate();
 var numbers = input.ToList();
 WithoutKey.Mix(numbers, input);
 var part1 = WithoutKey.FindCoordinateSum(numbers);
