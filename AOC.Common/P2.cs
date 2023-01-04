@@ -57,4 +57,16 @@ public record struct P2(long X, long Y) : IComparable
         Direction.Up => new P2(0, -1),
         _ => throw new NotImplementedException("unreachable"),
     };
+
+    public IEnumerable<P2> EightNeighbours() => new P2[]
+    {
+        new(X, Y - 1),
+        new(X + 1, Y - 1),
+        new(X + 1, Y),
+        new(X + 1, Y + 1),
+        new(X, Y + 1),
+        new(X - 1, Y + 1),
+        new(X - 1, Y),
+        new(X - 1, Y - 1),
+    };
 }
