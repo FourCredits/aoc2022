@@ -4,10 +4,7 @@ using AOC.Common;
 
 using Day22;
 
-var practice = args.Length > 0 && args[0] == "practice";
-var lines = File
-    .ReadAllLines(practice ? "inputs/practice.txt" : "inputs/22.txt")
-    .SplitBy(line => line != "");
+var lines = File.ReadAllLines("inputs/22.txt").SplitBy(line => line != "");
 Dictionary<P2, char> map = new(lines
     .ElementAt(0)
     .Grid()
