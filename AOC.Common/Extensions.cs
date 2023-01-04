@@ -54,7 +54,8 @@ public static class Extensions
     public static int Read(this ReadOnlySpan<char> s) =>
         int.Parse(s, NumberStyles.None, new CultureInfo("en-NZ"));
 
-    public static IEnumerable<((int, int), char)> Grid(this string[] lines)
+    public static IEnumerable<((int, int) pos, char c)> Grid(
+        this IEnumerable<string> lines)
     {
         foreach (var (y, line) in lines.Enumerate())
             foreach (var (x, c) in line.Enumerate())
