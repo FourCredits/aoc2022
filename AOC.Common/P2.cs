@@ -69,4 +69,12 @@ public record struct P2(long X, long Y) : IComparable
         new(X - 1, Y),
         new(X - 1, Y - 1),
     };
+
+    public IEnumerable<P2> FourNeighbours() => new P2[]
+    {
+        new(X, Y - 1),
+        new(X + 1, Y),
+        new(X, Y + 1),
+        new(X - 1, Y),
+    };
 }
