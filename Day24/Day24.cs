@@ -1,53 +1,102 @@
-﻿using AOC.Common;
+﻿var data = File.ReadAllLines("inputs/24.txt").ToArray();
 
-using Day24;
+var maxX = data[0].Length - 1;
+var maxY = data.Length - 1;
 
-var practice = args.Length > 0 && args[0] == "practice";
-Dictionary<P2, char> input = new(File
-    // .ReadAllLines(practice ? "inputs/practice.txt" : "inputs/24.txt")
-    .ReadAllLines("inputs/practice2.txt")
-    .Grid()
-    .Select(kv =>
-        new KeyValuePair<P2, char>(new(kv.pos.Item2, kv.pos.Item1), kv.c)));
-var blizzards = input
-    .Where(kv => kv.Value is not '#' and not '.')
-    .Select(kv => (kv.Key, kv.Value switch
-    {
-        '<' => Direction.Left,
-        '>' => Direction.Right,
-        'v' => Direction.Down,
-        '^' => Direction.Up,
-        _ => throw new NotImplementedException(),
-    }))
-    .ToHashSet();
-var walls = input
-    .Where(kv => kv.Value == '#')
-    .Select(kv => kv.Key)
-    .ToHashSet();
-// var valley = new Valley(blizzards, walls);
-// while (true)
-//     valley = valley.Tick();
-var valleys = new Valley(blizzards, walls).Iterate(v => v.Tick());
-var start = input.Where(kv => kv.Value == '.').Min(kv => kv.Key);
-var end = input.Where(kv => kv.Value == '.').Max(x => x.Key);
-var part1 = NavigateValley(valleys, start, end);
-Console.WriteLine($"part 1: {part1}");
+var blizzards = new List<(int x, int y, char direction)>();
+for (var y = 1; y < maxY; ++y)
+    for (var x = 1; x < maxX; ++x)
+        if (data[y][x] != '.')
+            blizzards.Add((x, y, data[y][x]));
 
-static int NavigateValley(IEnumerable<Valley> valleys, P2 start, P2 end)
+var maxBoards = (maxX - 1) * (maxY - 1);
+var occupiedSpotsByRound = new List<HashSet<(int x, int y)>>();
+var currentBlizzards = blizzards;
+for (var boardNum = 0; boardNum < maxBoards; ++boardNum)
 {
-    var startState = new State(0, start);
-    Queue<State> queue = new();
-    queue.Enqueue(startState);
-    HashSet<State> visited = new() { startState };
-    while (queue.TryDequeue(out var state))
+    var newBlizzards = new List<(int x, int y, char direction)>();
+    var occupiedSpots = new HashSet<(int x, int y)>();
+
+    foreach (var blizzard in currentBlizzards)
     {
-        Console.WriteLine(state);
-        if (state.Pos == end)
-            return state.Minutes;
-        var valley = valleys.ElementAt(state.Minutes + 1);
-        foreach (var nextState in state.Next(valley))
-            if (visited.Add(nextState))
-                queue.Enqueue(nextState);
+        _ = occupiedSpots.Add((blizzard.x, blizzard.y));
+
+        var newBlizzard = blizzard;
+        if (blizzard.direction == '<')
+        {
+            if (--newBlizzard.x < 1)
+                newBlizzard.x = maxX - 1;
+        }
+        else if (blizzard.direction == 'v')
+        {
+            if (++newBlizzard.y > maxY - 1)
+                newBlizzard.y = 1;
+        }
+        else if (blizzard.direction == '>')
+        {
+            if (++newBlizzard.x > maxX - 1)
+                newBlizzard.x = 1;
+        }
+        else if (blizzard.direction == '^')
+        {
+            if (--newBlizzard.y < 1)
+                newBlizzard.y = maxY - 1;
+        }
+
+        newBlizzards.Add(newBlizzard);
     }
-    throw new ArgumentException("No path found.");
+
+    occupiedSpotsByRound.Add(occupiedSpots);
+    currentBlizzards = newBlizzards;
+}
+
+var visited = new HashSet<(int x, int y, int step, short stage)>();
+var toRun = new Queue<(int x, int y, int step, short stage)>();
+toRun.Enqueue((1, 0, 0, 0));
+var foundPart1 = false;
+
+while (toRun.Count != 0)
+{
+    var current = toRun.Dequeue();
+    var (x, y, step, stage) = current;
+    if (x < 0 || x > maxX || y < 0 || y > maxY || data[y][x] == '#')
+        continue;
+
+    if (stage == 1 && y == 0)
+        stage = 2;
+
+    if (y == maxY)
+    {
+        if (stage == 0)
+        {
+            if (!foundPart1)
+            {
+                Console.WriteLine($"part 1: {step - 1}");
+                foundPart1 = true;
+            }
+            stage = 1;
+        }
+        else if (stage == 2)
+        {
+            Console.WriteLine($"part 2: {step - 1}");
+            break;
+        }
+    }
+
+    if (visited.Contains(current))
+        continue;
+
+    _ = visited.Add(current);
+
+    var obstacles = occupiedSpotsByRound[step % occupiedSpotsByRound.Count];
+    if (!obstacles.Contains((x, y)))
+        toRun.Enqueue((x, y, step + 1, stage));
+    if (!obstacles.Contains((x + 1, y)))
+        toRun.Enqueue((x + 1, y, step + 1, stage));
+    if (!obstacles.Contains((x - 1, y)))
+        toRun.Enqueue((x - 1, y, step + 1, stage));
+    if (!obstacles.Contains((x, y + 1)))
+        toRun.Enqueue((x, y + 1, step + 1, stage));
+    if (!obstacles.Contains((x, y - 1)))
+        toRun.Enqueue((x, y - 1, step + 1, stage));
 }
