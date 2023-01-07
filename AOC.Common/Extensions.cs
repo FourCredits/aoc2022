@@ -90,6 +90,17 @@ public static class Extensions
             foreach (var value in values)
                 yield return value;
     }
+
+    public static IEnumerable<T1> Unfold<T1, T2>(
+        this T2 start, Func<T2, (T1, T2)?> next)
+    {
+        var x = start;
+        while (next(x) is (T1 a, T2 b))
+        {
+            yield return a;
+            x = b;
+        }
+    }
 }
 
 public enum WindowMode
